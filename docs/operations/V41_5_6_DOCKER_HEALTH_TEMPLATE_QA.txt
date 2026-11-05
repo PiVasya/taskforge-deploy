@@ -1,0 +1,48 @@
+TaskForge Server v41.5.6 -- Standby CPU: optional Docker health field
+
+PRODUCTION EVIDENCE FROM A (2026-10-19):
+- v41.5.5 migrate: 17/17 PASS; standby leader B and hot_ready true
+- RabbitMQ optimization: standby_preflight, rabbitmq_healthcheck,
+  standby_hot_readiness all PASS; interval 30 seconds, retries 10
+- 20 one-second CPU samples: mostly 85-97 percent idle; several brief spikes
+- updater: monitoring, 0 pending, 0 failed, 0 Compose prepares
+- updater Docker fallback: 553 attempts, 553 recovered, no misses,
+  error: "template ... <.State.Health>: map has no entry for key Health"
+
+ROOT CAUSE:
+Docker CLI's Go template .State.Health access may fail if the map lacks
+Health (normal for a stopped, staged container). Prior release recovered
+with a fallback docker ps -a + raw JSON inspect; correct but expensive.
+Go-template's `index .State "Health"` safely returns empty for an absent
+map key and works with Docker missingkey=error; `with` preserves fallback.
+
+V41.5.6 CHANGE:
+All ten active code files using that fragile template are patched. No
+Docker daemon settings, Compose profiles, health probe definitions or
+HA polling intervals changed. Docker fallback is retained for genuinely
+missing containers/daemon errors. No automatic RabbitMQ recreation or
+changes to PostgreSQL, MinIO, Redis, etcd volumes.
+
+TESTS:
+- Go text/template missingkey=error reproducer on created/running and
+  healthy/unhealthy container map data.
+- Fake Docker updater confirms one inspect, zero fallbacks on present
+  staged container with absent health field; missing container still
+  triggers safe Docker listing and JSON fallback.
+- full inherited server release suite and independent archive extraction.
+
+POST-MIGRATION REAL WORLD VALIDATION (A only, before other nodes):
+  sudo bash /opt/taskforge/control/cluster.sh status | grep -E
+   '^node=|^agent_http=|^updater=|^updater_docker_inspect=|^update_degraded='
+  vmstat 1 15
+  sudo env DOCKER_CONFIG=/etc/taskforge/docker docker inspect
+   taskforge-prod-rabbitmq-1 --format '{{.Config.Healthcheck.Interval}}'
+
+EXPECTED: v41.5.6, warm standby with hot_ready true, no updater failures,
+new process fallback counter remains near zero if all assigned containers
+are present. RabbitMQ healthcheck remains 30 seconds. The counter resets
+on Node Agent restart. Some fallback calls are legitimate if a container
+is genuinely missing or Docker reports an actual error.
+
+LIMITATIONS: No live A/B/C integration from this development container;
+no claim of measured future CPU or automatic failover after deployment.

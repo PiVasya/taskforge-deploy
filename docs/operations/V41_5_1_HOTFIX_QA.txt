@@ -1,0 +1,53 @@
+TaskForge server v41.5.1 / revision 410501
+Hotfix validation, 2026-10-19
+
+SOURCE
+- Derived from taskforge-server-v41.5.0-auto-updates-metrics.tar.gz.
+- No application/backend/frontend source change needed specifically for this
+  server control-plane hotfix. v41.5.0 companion release must already be built
+  and published if UI graphs or Telegram filtering are required.
+
+TESTED (offline)
+- Python unittest discover: 119 tests PASS, 0 failures (including new 14
+  regression cases for fair registry batches, failing pulls, manual retries,
+  legacy updater ownership, durable last-good rollback and disabled 1C).
+- Baseline shell/Python syntax, isolated Compose invariant and safe volume tests
+  are part of tests/test-release.sh.
+- Full tests/test-release.sh: PASS (original server HA/volume/SQL/edge tests
+  plus the new v41.5.1 hotfix tests; no production Docker integration).
+- SHA-256 file manifest regenerated for v41.5.1 and verified with sha256sum -c.
+- Full TAR.GZ extraction integrity checked after assembly.
+
+FIXES
+1. Retire TaskForge's legacy Watchtower without deleting volumes or touching
+   another project's updater; prevent old replica re-home/verify paths from
+   resurrecting or requiring Watchtower. Repeat ownership check periodically.
+2. Bounded, fair registry checks in batches of up to 6 with 2 concurrent pulls;
+   increase single large image timeout from 180 to 420 seconds; per-image
+   persistent exponential retry (30s to 30m); allow explicit immediate check.
+3. Preserve the last-good release across health flaps. New candidate requires
+   continuous 60s healthy observation before replacing the rollback tag; avoid
+   premature cleanup. Roll back a failing candidate if an old good image exists.
+4. When 1C is disabled, migration does NOT forcibly restart unrelated healthy
+   app/API/frontend/worker containers. Previously 7 could be recreated.
+5. Keep independent registry thread status and explicit update_degraded line in
+   cluster status, not confused with the public traffic readiness signal.
+6. Release and telemetry revision bumped to 410501 so live migration proves the
+   new Node Agent is running, rather than accepting the previous release.
+
+NOT TESTED / LIMITATIONS
+- No real A/B/C servers, GHCR network, physical sensors, Docker Engine mutation,
+  PostgreSQL/Patroni switchover, Cloudflare DNS changes or Telegram delivery.
+- Docker image update is subject to registry/network availability and per-node
+  capacity. Single-instance service replacement is not an atomic zero-downtime
+  rolling deployment. Backoff retries cannot force an unreachable registry.
+- High VPS CPU steal is a host-provider condition, not cured by this patch.
+- No EF migrations or persistent database volume operation introduced.
+
+ROLLOUT
+- Same server archive on every node. Standby nodes first, check current
+  Patroni role, actual Primary last.
+- sudo bash ./cluster.sh migrate
+- sudo bash /opt/taskforge/control/cluster.sh status
+- sudo bash /opt/taskforge/control/cluster.sh updates status
+- sudo bash /opt/taskforge/control/cluster.sh updates check   # optional

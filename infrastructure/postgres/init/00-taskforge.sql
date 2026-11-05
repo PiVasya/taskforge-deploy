@@ -1,0 +1,2 @@
+-- TaskForge creates application databases through migrations/initialization.
+-- HA-specific replication roles are managed by Patroni bootstrap/quorum scripts.

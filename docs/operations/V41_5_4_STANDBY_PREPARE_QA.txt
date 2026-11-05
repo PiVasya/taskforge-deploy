@@ -1,0 +1,66 @@
+TaskForge v41.5.5 — Standby A repeated preparation / RabbitMQ CPU hotfix
+
+PRODUCTION INPUT (reported 2026-10-19 UTC):
+  A = standby, leader B, 4 logical CPUs, hot_ready=True, 31 GiB RAM.
+  RabbitMQ healthcheck rabbitmq-diagnostics ping, interval 5s, 1.3–1.8s each.
+  Measured RabbitMQ container CPU 42%, 77%, 166%, 181% in distinct snapshots.
+  Agent prepare counts: 110 -> 330 -> 370 -> 590 in a short time, phase
+  repeatedly applying, zero failed/pending between attempts.
+  No application running, routing unchanged in two diagnostic snapshots.
+  Original optimize rabbitmq-standby refused during active updater work.
+
+CODE DEFECT REPRODUCED OFFLINE:
+  _apply() recorded requested current_image immediately after prepare returned
+  zero, WITHOUT Docker inspecting the resulting container. With a simulated
+  successful-but-no-op backend, every 5-second lifecycle tick invoked another
+  prepare while status returned monitoring / pending=0 / failed=0.
+  The original runtime A-specific cause of no-op was not independently proven.
+
+FIX:
+  One Docker inspect after the first Compose up --no-start. If the requested
+  immutable image is not installed, retry once with --force-recreate, --no-start
+  and --no-deps. Verify again before updating durable current_image. On further
+  mismatch record a distinct failure with 30/60/120/... max 1800s backoff.
+  New image digests still bypass old failed-image backoff. Promotion still
+  starts verified prepared images and overrides any maintenance lease.
+  Preserve last-good rollback for active Primary as in existing release.
+
+RABBITMQ SAFETY:
+  30s diagnostic interval lives in compose/00-storage.yaml from v41.5.3 but
+  requires a container recreation to apply. No such recreation in migration.
+  Standby optimizer checks: 410505 local Node Agent, standby role, remote
+  leader, app_mode warm-standby, 0 running apps, hot_ready, not fenced,
+  no live traffic, no update failure, RabbitMQ running and healthy, existing
+  persistent RabbitMQ volume. Then it writes root-only expiring (600s) lease,
+  waits for Node Agent's maintenance_ack_token before any Compose mutation,
+  and recreates ONLY RabbitMQ with --no-deps (never down, never -v), verifying
+  exact named volume and healthy status. A Primary promotion/fence overrides
+  the updater maintenance token immediately. No other Docker project is touched.
+  The temporary RabbitMQ restart temporarily reduces standby failover readiness.
+
+OFFLINE COVERAGE:
+  python3 tests/test_v4154_standby_consistency.py  (23 focused tests)
+  python3 tests/test_managed_updates.py
+  python3 tests/test_update_extra.py
+  python3 tests/test_v4151_update_reliability.py
+  python3 tests/test_v4152_ownership.py
+  python3 tests/test_v4153_standby_efficiency.py
+  bash tests/test-release.sh
+  Shell syntax, Python compilation and SHA256 release manifest.
+
+PRODUCTION ACCEPTANCE ON A (B MUST BE HEALTHY PRIMARY):
+  1. Run migration, require 17/17 PASS.
+  2. Check role=standby, leader=B, hot_ready=True, 410505, failed=0.
+  3. Run optimize rabbitmq-standby ONCE; wait for maintenance ACK and only
+     RabbitMQ recreation; ensure rabbitmq_healthcheck=PASS and
+     standby_hot_readiness=PASS. If any check refuses, DO NOT force Docker.
+  4. docker inspect RabbitMQ: Interval=30s Retries=10 health=healthy.
+  5. Compare updater_compose prepare and updater_prepare counters across a
+     5–10 minute interval with no new images; steady unchanged targets => no
+     recurring prepares. Confirm zero failed, hot_ready=True, PostgreSQL
+     remains streaming replica, HA works, then compare vmstat CPU idle.
+  6. Do not modify B or C merely to investigate the A CPU problem.
+
+KNOWN LIMITATION: No real production runtime, images, Docker daemon, GHCR or
+Patroni failover were available offline. No claim of actual CPU improvement
+before real measurements.

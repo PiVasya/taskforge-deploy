@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "cluster_name": "taskforge-prod",
+  "wireguard_cidr": "10.80.0.0/24",
+  "maximum_lag_on_failover_bytes": 67108864,
+  "maximum_lag_on_switchover_bytes": 16777216,
+  "shared_state_interval_seconds": 60,
+  "etcd_image": "gcr.io/etcd-development/etcd:v3.6.14",
+  "nodes": [
+    {
+      "id": "A",
+      "priority": 100,
+      "public_host": "91.149.153.106",
+      "dcs_voter": true,
+      "app": {
+        "profile": "full",
+        "can_be_primary": true
+      },
+      "wireguard": {
+        "ip": "10.80.0.1"
+      },
+      "web": {
+        "tls_mode": "auto"
+      },
+      "postgres": {
+        "host_port": 5432,
+        "patroni_rest_port": 8008
+      },
+      "etcd": {
+        "client_port": 2379,
+        "peer_port": 2380
+      },
+      "health_port": 9187,
+      "minio": {
+        "api_port": 9000
+      }
+    },
+    {
+      "id": "B",
+      "priority": 90,
+      "public_host": "176.118.198.46",
+      "dcs_voter": true,
+      "app": {
+        "profile": "full",
+        "can_be_primary": true
+      },
+      "wireguard": {
+        "ip": "10.80.0.2"
+      },
+      "web": {
+        "tls_mode": "auto"
+      },
+      "postgres": {
+        "host_port": 5432,
+        "patroni_rest_port": 8008
+      },
+      "etcd": {
+        "client_port": 2379,
+        "peer_port": 2380
+      },
+      "health_port": 9187,
+      "minio": {
+        "api_port": 9000
+      }
+    },
+    {
+      "id": "C",
+      "priority": 80,
+      "public_host": "13.143.176.160",
+      "dcs_voter": true,
+      "app": {
+        "profile": "lite",
+        "can_be_primary": true
+      },
+      "wireguard": {
+        "ip": "10.80.0.3"
+      },
+      "web": {
+        "tls_mode": "auto"
+      },
+      "postgres": {
+        "host_port": 5432,
+        "patroni_rest_port": 8008
+      },
+      "etcd": {
+        "client_port": 2379,
+        "peer_port": 2380
+      },
+      "health_port": 9187,
+      "minio": {
+        "api_port": 9000
+      }
+    }
+  ]
+}

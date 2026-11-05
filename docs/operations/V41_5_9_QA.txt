@@ -1,0 +1,43 @@
+TaskForge Server v41.5.9 / 410509 - OFFLINE QA
+Date: 2026-10-23
+Baseline: taskforge-server-v41.5.8-stopped-app-recovery-hotfix.tar.gz
+
+RELEASE HARNESS
+Command: PYTHONDONTWRITEBYTECODE=1 bash tests/test-release.sh
+Result: exit 0 (complete, not truncated and not terminated by timeout).
+Native unittest cases reported by the harness: 233 in 18 groups.
+Additional top-level regression scripts and embedded migration/storage assertions
+also completed. Python regression modules invoked: 25.
+Exact output: V41_5_9_RELEASE_TEST.log
+
+NEW TESTS: 38/38 PASS
+- HA evidence / local guard / application mutations: 23.
+- DCS timing apply / rollback / ambiguous response / unhealthy quorum: 11.
+- Historical Docker json-file collection / protected logs / redaction: 4.
+The existing unhealthy-recovery regression was updated to test the new
+3-sample / 60-second confirmation window AND retain bounded-retry assertions.
+The existing notification test advances a fake monotonic clock rather than
+sleeping for the new 30-second confirmation period. No tests were disabled.
+
+CHECKED
+- Full package manifest, Python compile and bash -n.
+- Persistent volume identity preservation and state-based migration assertions.
+- Existing v41.5.7 primary-hold and v41.5.8 stopped/unhealthy recovery regressions.
+- Dynamic policy changes ONLY ttl/loop_wait/retry_timeout.
+- TWO all-node preflights; custom values preserved unless explicitly applying.
+- Positive replica/conflicting-role evidence still stops old writers.
+- Transient post-start authorization error does NOT stop the application.
+- Persistent unhealthy restart requires elapsed time, samples and recovery gate.
+- Fences and desired-state-generation races cancel stale work.
+- HA diagnostics archives default to the invoking directory and invoking UID.
+- PostgreSQL/etcd logs excluded from application log cleanup.
+- No EF schema migration generated; no application image changed.
+
+NOT EXECUTED
+- Live A/B/C migration or production Patroni PATCH.
+- Real Docker/etcd network partition, WireGuard loss, CPU scheduling stalls.
+- Production Cloudflare, ACME, Telegram delivery, or frontend rendering.
+Offline tests simulate the interfaces; they are not evidence of a live rollout.
+The new timing profile cannot guarantee uninterrupted service through a real
+quorum loss. Existing replication mode and lag policy are unchanged; no new
+zero-data-loss guarantee is made.

@@ -1,0 +1,73 @@
+TaskForge v41.5.7 server release (revision 410507): Primary application-desired hold hotfix
+
+INCIDENT CONTEXT (2026-10-21, node B)
+- Nighttime application update completed earlier; afternoon application containers
+  were later found Exited(0), Exited(143) or Exited(137).
+- Containers manually started on B became healthy with no image rebuild.
+- Incident notifications came from the application updater, not the Docker daemon.
+- Prior application control allowed a transient missing Patroni /cluster leader
+  response to turn into desired=[] even when local /patroni still said Primary.
+- Logs provided so far support this as a credible failure path, but do not
+  contain a preserved historical /cluster response at the exact first stop.
+
+ROOT-CAUSE CODE PATH
+- Node Agent tick computed the primary role from /patroni, and retained the
+  confirmed leader through leader hysteresis.
+- At the end of tick it nevertheless required *that very tick's* observed
+  /cluster leader to equal the local node. An empty or timed-out /cluster reply
+  consequently published an empty desired application set.
+- ManagedUpdates.step honors desired=[] by stopping all unwanted application
+  containers with docker stop. That can leave most apps Exited without OOM.
+- A transient missing /cluster reply also revoked the edge supervisor and
+  readiness, potentially prompting repeated public edge checks.
+
+HOTFIX
+- Preserve existing desired applications and routing generation during an
+  ambiguous /cluster result while local Patroni still reports Primary.
+  Hold is not permission to start, replace or otherwise mutate running apps:
+  app_start_allowed() still needs fresh positive local Patroni and /cluster
+  evidence before preparation/start.
+- Explicit conflicting DCS leader, confirmed local Standby, forbidden Primary,
+  disabled quorum, or persistent local Patroni role uncertainty still publish
+  the appropriate fenced/stopped desired state. Promotion and explicit standby
+  assist policies are unchanged.
+- Preserve edge proofs on a transient empty /cluster leader; immediately revoke
+  on confirmed role loss, disabled quorum, control fencing or positive conflict.
+- Surface patroni_local_http, patroni_cluster_http, app_desired_policy,
+  app_desired_reason and hold counters in HA telemetry.
+- Persist stop reason/timestamp for Node Agent policy stops and start reason
+  for automatic recovery. updater snapshot publishes desired_count/reason.
+- No PostgreSQL/Patroni configuration, database migrations, Docker daemon
+  settings, persistent data volumes or application images are changed.
+
+REPRODUCTION / REGRESSION
+- Agent.tick called on node B with local /patroni Primary and /cluster timeout:
+  desired stays assigned; two healthy apps keep running; edge is not revoked.
+- Local Primary plus a positive different /cluster leader: desired becomes empty,
+  both apps are stopped, and the reason is visible.
+- Confirmed local Replica stops writers as before.
+- State policy covers three consecutive unknown local Patroni samples, assist,
+  disabled quorum and primary-not-allowed.
+
+RELEASE AND LIMITS
+- This is a new v41.5.7 / 410507 package, upgrading the installed
+  v41.5.6 / 410506 control plane through the existing state-based migration.
+  Use the same archive on A/B/C, standby nodes first, and the actual Patroni
+  Primary LAST, with role checks before each operation.
+- Offline Python/unit tests can validate code paths but cannot prove physical
+  A/B/C failover, GHCR publication, live Cloudflare, or production switchover.
+- A persistent /patroni outage still fences after the existing three missed
+  samples. This hotfix does not bypass HA safety or guarantee zero downtime
+  for a legitimate application image replacement.
+
+READ-ONLY PRODUCTION EVIDENCE
+  sudo bash /opt/taskforge/control/cluster.sh status
+  sudo bash /opt/taskforge/control/cluster.sh updates status
+  sudo python3 -c 'import json; from pathlib import Path; t=json.loads(Path("/var/lib/taskforge/cluster/node-telemetry.json").read_text()); print("HA:", {k:t.get("ha",{}).get(k) for k in ("role","leader","patroni_local_http","patroni_cluster_http","app_desired_policy","app_desired_reason","primary_cluster_hold_total")}); print("UPDATER:", {k:t.get("update",{}).get(k) for k in ("desired_count","desired_reason","status","error","failed_count")})'
+
+INSTALLATION
+  # On a verified STANDBY first, from the extracted refreshed archive:
+  sudo bash ./cluster.sh migrate
+  sudo bash /opt/taskforge/control/cluster.sh status
+  # Repeat on the other standby, then the actual current Primary LAST.
+  # Do not use docker compose down, manual pg_rewind, or force-primary.

@@ -1,0 +1,125 @@
+TASKFORGE SERVER v41.5.9 / 410509
+BASE: taskforge-server-v41.5.8-stopped-app-recovery-hotfix.tar.gz
+
+PURPOSE
+Prevent additional application outages caused by interpreting one unsuccessful
+health/role lookup as a destructive lifecycle instruction. Preserve Patroni and
+etcd as the only database leadership authorities. Keep all existing v41.5.7 and
+v41.5.8 repairs, storage bindings, credentials, SQL and 1C behavior.
+The supplied taskforge-develop(184).zip is an application source snapshot with
+older embedded deployment code; it is NOT used to overwrite stable server code.
+
+IMPLEMENTED
+1. A successful container start is not undone merely because the next START
+   authorization request times out. Fresh positive STOP evidence is separate.
+2. Every policy stop rechecks authority and the desired-state generation. A
+   promotion arriving during the check cancels a stale standby stop. Compose
+   prepare and its force-recreate fallback also recheck the mutation guard.
+3. Restarting a running/unhealthy application requires at least 3 observations
+   spanning 60 seconds, permission to recover, and healthy core dependencies.
+   A new container/start identity resets the confirmation window. Already exited
+   desired applications retain bounded recovery from v41.5.8 without that delay.
+4. A missing local role requires at least 3 samples AND 30 elapsed monotonic
+   seconds before the fallback application fence. Confirmed demotion or a
+   positive conflicting leader still fences application writers immediately.
+5. Local Patroni WireGuard-path timeouts get a bounded second read over loopback
+   INSIDE the existing PostgreSQL container. This is a GET, not a restart.
+   Starting an application additionally requires Patroni /primary HTTP 200.
+6. Previous-Primary alerts require repeated failures of BOTH Agent and Patroni
+   across >=30 seconds, rather than one 1.5-second timeout. A responding Patroni
+   prevents a whole-node-unreachable alert. Evidence says unreachable FROM this
+   observer; it never claims proof that the host is dead.
+7. A read-only worker in the EXISTING Node Agent probes Agent, Patroni, etcd
+   health and Raft TCP reachability. TCP connect alone is NOT quorum proof.
+   Three failures over >=30 seconds produce a deduplicated connectivity warning;
+   recovery is recorded separately. This worker never promotes or demotes a DB.
+8. New registry polling is deferred while observed quorum/role is unavailable.
+   Already-running bounded pulls are not forcibly killed. Ready-image replacement
+   of a running app also waits for recovery authorization and dependencies.
+9. Bounded ha-health-history.jsonl and ha-decisions.jsonl record observer,
+   endpoints, latency, role, timeline and lifecycle reasons. PostgreSQL/etcd
+   Docker logs are protected from the application log-cleanup operation.
+10. cluster.sh ha collect writes the archive to the caller's current directory,
+    with the invoking sudo user's ownership. It uses a separate empty Docker
+    client config, records errors/timeouts, and ALSO reads retained json-file
+    records read-only when Docker's historical output is empty. This does not
+    prove why the previous Docker log query returned no records.
+
+CLUSTER TIMING POLICY -- IMPORTANT OPERATIONAL CHANGE
+New default: ttl=120, loop_wait=10, retry_timeout=45 seconds.
+Invariant: loop_wait + 2*retry_timeout <= ttl (10 + 90 <= 120).
+This increases tolerance of short DCS/network delays; it increases the time to
+fail over after a real crash. 120 seconds is a lease TTL, NOT a promised total
+recovery time. PostgreSQL promotion, applications and edge readiness take time.
+
+Updating bootstrap YAML alone does NOT change an existing cluster. Therefore
+migration has an explicit, verified live PATCH /config step. It changes ONLY
+those three timer keys, uses existing Basic authentication and explicit body
+length, and does not recreate/restart PostgreSQL or etcd. Replication mode,
+maximum lag, failsafe configuration and data-directory protections are unchanged.
+The current Primary must confirm all members' identity, healthy etcd endpoints,
+a unique agreed leader and all Agent revisions >=410509 in TWO complete checks.
+A response lost after PATCH is verified by reads; no blind duplicate PATCH.
+
+Standby migrations do not patch the global policy. Migrate BOTH current standbys
+first, the CURRENT Primary last. Determine roles immediately before migration.
+If the effective timers are customized (not 30/10/10), migration deliberately
+refuses to overwrite them. Inspect with `cluster.sh ha policy status`, then
+explicitly `sudo bash ./cluster.sh ha policy apply` ONLY if adopting this profile
+is intended. A failed proof stops the policy step; no forced failover follows.
+The new Agent may already be installed when the policy step fails. Status reports
+actual version separately from effective timer status; do not equate installation
+with successful timing-policy application.
+
+INSTALL
+  tar -xzf taskforge-server-v41.5.9-ha-stability.tar.gz
+  cd taskforge-server-v41.5.9
+  cat VERSION REVISION
+  sha256sum -c RELEASE_MANIFEST.sha256
+  sudo bash ./cluster.sh migrate
+
+Verify on the actual Primary:
+  sudo bash /opt/taskforge/control/cluster.sh status
+  sudo bash /opt/taskforge/control/cluster.sh ha policy status
+  sudo bash /opt/taskforge/control/cluster.sh ha status
+
+Expected timing result: matches_target=true. Primary migration prints
+HA_POLICY: VERIFIED on all nodes ... . Status must still show one actual
+Primary, consistent leader, public readiness and healthy expected applications.
+Standby applications intentionally stopped are not failures.
+No EF schema migrations or application image rebuilds are required by this change.
+
+TIMING ROLLBACK
+The original three values are saved on the applying Primary in
+/var/lib/taskforge/cluster/ha-timing-before-v41.5.9.json (0600).
+  sudo bash /opt/taskforge/control/cluster.sh ha policy rollback
+Run on the current Primary which holds that saved backup. It repeats the same
+all-node safety checks and refuses intervening custom changes. No whole-DCS
+config overwrite. A later migration of this release can apply its profile again.
+
+DIAGNOSTICS -- ARCHIVE IN CURRENT DIRECTORY
+  sudo bash /opt/taskforge/control/cluster.sh ha collect --since 24h
+Historical example (UTC, inclusive):
+  sudo bash /opt/taskforge/control/cluster.sh ha collect \
+    --since 2026-10-22T20:45:00Z --until 2026-10-23T00:00:00Z
+Collection is bounded. Inspect manifest.json for timed-out/unsupported commands.
+Logs may contain private information despite best-effort redaction. No .env or
+full Docker environment dump is collected. Live log files are never truncated.
+
+SAFETY BOUNDARY
+This cannot repair a physically unavailable network, missing quorum, CPU stalls
+or failed storage. Do NOT keep a writable PostgreSQL Primary indefinitely after
+losing its DCS lease and failsafe confirmation. Deliberate DB demotion remains
+necessary in that situation. No quorum reduction, unsafe forced promotion,
+manual leader-key writes or disabling fencing has been introduced.
+No etcd Raft timer changes/recreation or Docker daemon reconfiguration is hidden
+in migration. No networking/Wi-Fi/firewall change is claimed to fix this incident.
+
+PRIMARY REFERENCES (checked 2026-10-23)
+https://patroni.readthedocs.io/en/latest/dynamic_configuration.html
+https://patroni.readthedocs.io/en/latest/rest_api.html
+https://patroni.readthedocs.io/en/latest/dcs_failsafe_mode.html
+https://etcd.io/docs/v3.6/tuning/
+
+TEST RESULTS
+See V41_5_9_QA.txt. Offline tests are not production A/B/C validation.

@@ -1,0 +1,58 @@
+TaskForge v41.5.3: A warm-standby CPU-load diagnosis and safe policy
+
+OBSERVED (from user output, 2026-10-19):
+A, 4 vCPU, PostgreSQL standby of B, hot_ready=True, 31 GiB physical RAM.
+Approx. 28 GiB MemAvailable: not a memory-pressure issue on A.
+RabbitMQ CPU samples: 181.27%, 77.32%, 166.05%, 0.67%, 42.15%.
+Live container healthcheck: CMD rabbitmq-diagnostics ping, interval 5s,
+retries 60, timeout 5s; each reported check 1.3-1.8 seconds of Erlang work.
+Five distinct docker-compose PIDs appeared in five samples 2 seconds apart.
+Agent updater was still phase=applying (java-runner, support-bot, solutions-api)
+while preparing changed application images on the standby.
+
+CONFIRMED ROOT CAUSES / LIMITATIONS:
+- A real, repetitive and expensive RabbitMQ Erlang healthcheck is confirmed.
+- Updater does one targeted Compose --no-start to stage EACH changed application;
+  this contributes transient CPU while a release is being prepared. Do not
+  equate an active one-at-a-time applying phase with a stuck infinite loop.
+- Some repeated Compose calls originate from image-config reference lookups;
+  v41.5.3 deduplicates references across registry batches. Not all observed
+  Compose PIDs were traced to their parent processes: attribution is limited.
+- No real host-after-fix load delta has been measured; CPU reduction is a
+  prediction, not a production result.
+
+POLICY:
+- RabbitMQ healthcheck stays an actual RabbitMQ diagnostic. 5s x 60 retries
+  becomes 30s x 10 retries, approx. 300s in both cases (Docker intervals are
+  between checks; actual wall-time includes command duration). 10s timeout
+  avoids premature failure on slow VPS. Faster initial health assessment is
+  traded for substantially less baseline CPU, no claim of identical latency.
+- Standby fencing/HA Agent main loop and app lifecycle loop remain at 5s.
+- Any PRIMARY promotion/demotion/routing change wakes updater immediately.
+- Compose `config` references cache is short, mtime invalidated, NOT the image
+  digest; `docker pull` continues on each requested image scan.
+- Standby-only RabbitMQ optimize is manually requested; initial release
+  migration never recreates data containers. Exact RabbitMQ named-volume
+  identity is checked before/after. Primary/assist/uncertain standby are fenced.
+
+OFFLINE TESTS:
+  python3 tests/test_v4153_standby_efficiency.py
+  python3 tests/test_managed_updates.py
+  python3 tests/test_update_extra.py
+  python3 tests/test_v4151_update_reliability.py
+  python3 tests/test_v4152_ownership.py
+  python3 tests/test_agent_efficiency.py
+  bash tests/test-release.sh
+
+PRODUCTION ACCEPTANCE (operator, first run ONLY ON A):
+  sudo bash ./cluster.sh migrate
+  sudo bash /opt/taskforge/control/cluster.sh status
+  sudo bash /opt/taskforge/control/cluster.sh optimize rabbitmq-standby
+  sudo docker inspect taskforge-prod-rabbitmq-1 \
+    --format '{{json .Config.Healthcheck}}'
+  sudo bash /opt/taskforge/control/cluster.sh status
+  vmstat 1 10
+  sudo docker stats --no-stream taskforge-prod-rabbitmq-1
+
+All production data volumes must stay unchanged; no database or MinIO
+re-creation or Primary switching is part of this performance release.

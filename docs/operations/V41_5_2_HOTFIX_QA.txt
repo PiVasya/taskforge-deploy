@@ -1,0 +1,38 @@
+TaskForge server v41.5.2 / revision 410502
+Bugfix validation, 2026-10-19
+
+GROUNDING:
+- B after v41.5.1: 38/38 assigned Docker containers running/healthy;
+  no Watchtower container listed by docker ps -a; site traffic_ready=True.
+- Node Agent incorrectly recorded update.error=legacy-updater-still-active,
+  update.status=taking-ownership, last_scan_at=null.
+- v41.5.1 DockerApplications.retire_watchtower() depended on localized
+  `docker inspect` stderr on missing containers and returned False for any
+  other error, indistinguishable from active legacy updater.
+- Migration and other scripts exported full telemetry JSON into a single
+  environment variable; host history can exceed Linux's per-string execve
+  limit. The user's failure output was dominated by a huge telemetry dump.
+
+CHANGES:
+- Docker ps queries for project+service label and exact fallback name;
+  errors distinguished from active Watchtower. Nothing removed from other
+  projects. Fail closed if Docker cannot be reached.
+- Large telemetry passed over fd 3 to Python; migration output bounded.
+- Agent owner proof added to migration, beyond HA liveness.
+- Healthy SQL cache containers not recreated on soft migration.
+- Read-only remote HA verification tolerates rolling mixed release versions
+  at or above 410400 while requiring healthy reconciled standbys.
+- Release revisions and tests updated; nothing changes app source or EF.
+
+TEST LIMITS:
+- Unit tests and simulated Docker returns; no real A/B/C integration.
+- GHCR/Cloudflare/Patroni/network behavior cannot be proven offline.
+- No external guarantee of updates if GHCR or hardware is unavailable.
+
+PRODUCTION INSTALL:
+- Actual standby nodes first, then actual current Patroni Primary.
+- tar -xzf taskforge-server-v41.5.2-owner-and-telemetry-hotfix.tar.gz
+- cd taskforge-server-v41.5.2
+- sudo bash ./cluster.sh migrate
+- sudo bash /opt/taskforge/control/cluster.sh status
+- sudo bash /opt/taskforge/control/cluster.sh updates status

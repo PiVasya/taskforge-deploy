@@ -1,0 +1,57 @@
+TASKFORGE SERVER v41.5.5 -- Standby Docker observe and RabbitMQ safety
+
+PRODUCTION MOTIVATION -- A only
+After upgrading to v41.5.4 on A, the migration completed 17/17 PASS and
+PostgreSQL remained standby (leader=B, hot_ready=True). However, the updater
+reported ten errors 'docker-inspect-unavailable', failed=10, pending=10,
+while RabbitMQ still had a 5-second Erlang healthcheck. The optimizer refused
+with 'standby-preflight-failed: no-update-failures'.
+
+ROOT CAUSE SCOPE
+'DockerApplications.observe()' in v41.5.4 guessed whether inspect failure
+was a missing container using English stderr text and did not report the
+actual Docker failure. The server logs provided to this release do not include
+Docker CLI stderr, so the precise production error text is unproven.
+
+CHANGES
+1. Normal successful Docker formatted inspect stays single-command.
+2. On nonzero, partial or malformed inspect, query actual `docker ps -a`
+   including stopped/created containers. Match only exact TaskForge project
+   container names, never mutate containers found in other Compose projects.
+3. Inspect existing IDs via raw Docker JSON, avoiding fragile format templates.
+4. Fail closed if Docker itself cannot list or inspect. Emit a concrete short
+   failure category instead of `docker-inspect-unavailable`.
+5. Export 'updater_docker_inspect=' counters so production diagnosis does not
+   rely on guesses from error text.
+6. On agent restart clear ONLY old `docker-inspect-unavailable` records from
+   v41.5.4, resetting their retry timers. Preserve all other errors, last-good
+   image IDs, targets, actual containers, and volume identities.
+7. On confirmed warm-standby with hot_ready=True, no running apps and healthy
+   updater worker, allow the RabbitMQ-only maintenance lease even if unrelated
+   application image staging is failing. Still require the exact maintenance
+   acknowledgement, healthy RabbitMQ, stable data-volume identity, and HA
+   readiness proof. No application errors are hidden from normal status.
+
+INSTALLATION (ON A ONLY; B MUST BE HEALTHY PRIMARY)
+ sudo bash ./cluster.sh migrate
+ sudo bash /opt/taskforge/control/cluster.sh status
+ sudo bash /opt/taskforge/control/cluster.sh optimize rabbitmq-standby
+ sudo bash /opt/taskforge/control/cluster.sh status
+
+POST-CHECK
+ agent_revision=410505, hot_ready=True, role=standby, leader=B
+ RabbitMQ healthcheck Interval=30s, Retries=10, persistent volume unchanged
+ updater_docker_inspect=...; pending and failed should diminish with real
+ verification; do not claim 'all healthy' without checking actual Docker.
+ Re-sample vmstat; CPU reduction not verified until tested on actual A.
+
+OFFLINE REGRESSIONS
+ tests/test_v4155_docker_observe.py: 20 focused Docker fallback, upgrade-state,
+ fail-closed and HA optimizer safety tests. Previous all unit regressions also
+ run separately. No actual Docker/Patroni remote integration in build environment.
+
+SAFETY
+ - Migration does NOT restart RabbitMQ or delete/recreate persistent volumes.
+ - Optimizer touches ONLY RabbitMQ, after user opt-in and HA gate.
+ - Other Compose projects, including tgcapcha-prod, remain outside scope.
+ - Operator must not call optimizer while B is unavailable or during failover.

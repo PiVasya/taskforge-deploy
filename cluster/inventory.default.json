@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "mode": "replica",
+  "cluster_name": "taskforge-prod",
+  "wireguard_cidr": "10.80.0.0/24",
+  "nodes": [
+    {
+      "id": "A",
+      "priority": 100,
+      "public_host": "91.149.153.106",
+      "quorum_voter": true,
+      "wireguard": {
+        "ip": "10.80.0.1"
+      },
+      "app": {
+        "profile": "full",
+        "can_be_primary": true
+      }
+    },
+    {
+      "id": "B",
+      "priority": 90,
+      "public_host": "176.118.198.46",
+      "quorum_voter": true,
+      "wireguard": {
+        "ip": "10.80.0.2"
+      },
+      "app": {
+        "profile": "full",
+        "can_be_primary": true
+      }
+    },
+    {
+      "id": "C",
+      "priority": 80,
+      "public_host": "13.143.176.160",
+      "quorum_voter": true,
+      "wireguard": {
+        "ip": "10.80.0.3"
+      },
+      "app": {
+        "profile": "lite",
+        "can_be_primary": true
+      }
+    }
+  ]
+}

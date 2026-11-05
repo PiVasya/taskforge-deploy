@@ -1,0 +1,109 @@
+PASS: R59 manifest validates
+PASS: no historical release payload is embedded
+PASS: no Python cache artifacts are packaged
+PASS: shell/Python syntax
+PASS: A/B full, C lite, all may be Primary, no preferred failback
+PASS: topology normalization and operator ownership
+PASS: arbitrary old release state import + immutable persistent-volume baseline
+PASS: migration is state-based and contains no historical migration engine
+PASS: persistent-volume mutation is absent and temporary Primary selection is revision-agnostic
+PASS: re-home service inventory matches current Compose
+PASS: Cloudflare edge candidates A/B/C
+[taskforge] current Primary=A; requested Primary=C; target_profile=lite; cluster_view=B
+[taskforge] target preflight PASS: hot_start_ready=true lag=1024 edge_required=false
+[taskforge] Patroni accepted switchover A -> C (http=200).
+[taskforge] confirmed Primary=C; applications_active=True traffic_ready=False edge=unconfigured
+PRIMARY SWITCH: COMPLETE target=C changed=yes profile=lite
+PASS: manual Primary switch accepts C/lite
+R59 BASE REGRESSION TEST: PASS
+test_c_lite_can_update_edge (__main__.CFTests.test_c_lite_can_update_edge) ... ok
+test_cname_loop_rejected (__main__.CFTests.test_cname_loop_rejected) ... ok
+test_duplicate_aaaa_unknown_ip_and_disabled_proxy_block (__main__.CFTests.test_duplicate_aaaa_unknown_ip_and_disabled_proxy_block) ... ok
+test_fence_prevents_dns_changes (__main__.CFTests.test_fence_prevents_dns_changes) ... ok
+test_local_lock_prevents_concurrent_dns_writer (__main__.CFTests.test_local_lock_prevents_concurrent_dns_writer) ... ok
+test_lost_api_response_is_included_in_rollback (__main__.CFTests.test_lost_api_response_is_included_in_rollback) ... ok
+test_lost_leadership_stops_remaining_writes_and_rollback (__main__.CFTests.test_lost_leadership_stops_remaining_writes_and_rollback) ... ok
+test_partial_failure_rolls_back_only_while_still_primary (__main__.CFTests.test_partial_failure_rolls_back_only_while_still_primary) ... ok
+test_reconcile_then_idempotent_noop (__main__.CFTests.test_reconcile_then_idempotent_noop) ... ok
+test_acme_retry_cooldown_blocks_new_issuance (__main__.PipelineTests.test_acme_retry_cooldown_blocks_new_issuance) ... ok
+test_ca_failure_without_certificate_is_not_ready (__main__.PipelineTests.test_ca_failure_without_certificate_is_not_ready) ... ok
+test_demotion_during_certbot_prevents_gateway_restart (__main__.PipelineTests.test_demotion_during_certbot_prevents_gateway_restart) ... ok
+test_demotion_during_route_proof_stops_certbot (__main__.PipelineTests.test_demotion_during_route_proof_stops_certbot) ... ok
+test_demotion_during_settle_stops_certbot (__main__.PipelineTests.test_demotion_during_settle_stops_certbot) ... ok
+test_dns_failure_cannot_reach_certbot (__main__.PipelineTests.test_dns_failure_cannot_reach_certbot) ... ok
+test_exact_order_new_certificate (__main__.PipelineTests.test_exact_order_new_certificate) ... ok
+test_existing_cert_http_only_gateway_is_restarted (__main__.PipelineTests.test_existing_cert_http_only_gateway_is_restarted) ... ok
+test_existing_cert_reused_without_restart_or_ca_request (__main__.PipelineTests.test_existing_cert_reused_without_restart_or_ca_request) ... ok
+test_failed_renewal_preserves_valid_certificate_but_warns (__main__.PipelineTests.test_failed_renewal_preserves_valid_certificate_but_warns) ... ok
+test_http_confirmations_reset_after_any_failed_round (__main__.PipelineTests.test_http_confirmations_reset_after_any_failed_round) ... ok
+test_http_profile_does_not_issue_tls_certificate (__main__.PipelineTests.test_http_profile_does_not_issue_tls_certificate) ... ok
+test_http_wrong_node_never_reaches_certbot (__main__.PipelineTests.test_http_wrong_node_never_reaches_certbot) ... ok
+test_https_failure_never_sets_ready (__main__.PipelineTests.test_https_failure_never_sets_ready) ... ok
+test_policy_rejects_invalid_timeouts_and_weak_confirmation_count (__main__.PipelineTests.test_policy_rejects_invalid_timeouts_and_weak_confirmation_count) ... ok
+test_unconfigured_edge_does_not_invent_dns_success (__main__.PipelineTests.test_unconfigured_edge_does_not_invent_dns_success) ... ok
+test_real_http_challenge_and_real_tls_gateway_identity (__main__.RealCurlTests.test_real_http_challenge_and_real_tls_gateway_identity) ... ok
+test_cache_hit_rejected_even_with_matching_body (__main__.RouteTests.test_cache_hit_rejected_even_with_matching_body) ... ok
+test_cf_response_required (__main__.RouteTests.test_cf_response_required) ... ok
+test_challenge_symlink_is_rejected (__main__.RouteTests.test_challenge_symlink_is_rejected) ... ok
+test_https_checks_gateway_identity_not_nonexistent_https_acme (__main__.RouteTests.test_https_checks_gateway_identity_not_nonexistent_https_acme) ... ok
+test_invalid_host_cannot_inject_url_or_path (__main__.RouteTests.test_invalid_host_cannot_inject_url_or_path) ... ok
+test_marker_cleanup_on_cancellation (__main__.RouteTests.test_marker_cleanup_on_cancellation) ... ok
+test_redirect_is_not_mistaken_for_route_proof (__main__.RouteTests.test_redirect_is_not_mistaken_for_route_proof) ... ok
+test_unique_nonce_all_hosts_and_cleanup (__main__.RouteTests.test_unique_nonce_all_hosts_and_cleanup) ... ok
+test_wrong_body_is_rejected (__main__.RouteTests.test_wrong_body_is_rejected) ... ok
+test_slow_edge_worker_does_not_block_live_http_or_telemetry_and_cancels (__main__.SupervisorTests.test_slow_edge_worker_does_not_block_live_http_or_telemetry_and_cancels) ... ok
+test_stale_proof_expires (__main__.SupervisorTests.test_stale_proof_expires) ... ok
+test_certbot_retry_ledger_survives_new_process (__main__.SystemOpsTests.test_certbot_retry_ledger_survives_new_process) ... ok
+test_directory_instead_of_both_cf_files_is_not_unconfigured (__main__.SystemOpsTests.test_directory_instead_of_both_cf_files_is_not_unconfigured) ... ok
+test_guard_checks_timeline_and_primary_even_when_agent_claims_primary (__main__.SystemOpsTests.test_guard_checks_timeline_and_primary_even_when_agent_claims_primary) ... ok
+test_guard_does_not_trust_stale_config (__main__.SystemOpsTests.test_guard_does_not_trust_stale_config) ... ok
+test_guard_rejects_missing_timeline (__main__.SystemOpsTests.test_guard_rejects_missing_timeline) ... ok
+test_guard_respects_fence (__main__.SystemOpsTests.test_guard_respects_fence) ... ok
+test_guarded_command_is_cancelled_and_child_reaped (__main__.SystemOpsTests.test_guarded_command_is_cancelled_and_child_reaped) ... ok
+test_local_tls_uses_ca_validation_and_both_domains (__main__.SystemOpsTests.test_local_tls_uses_ca_validation_and_both_domains) ... ok
+test_partial_token_configuration_is_fail_closed (__main__.SystemOpsTests.test_partial_token_configuration_is_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 46 tests in 1.414s
+
+OK
+test_owned_certbot_is_cleaned_on_demotion (__main__.CertbotContainerTests.test_owned_certbot_is_cleaned_on_demotion) ... ok
+test_successful_cli_without_certificate_is_not_success (__main__.CertbotContainerTests.test_successful_cli_without_certificate_is_not_success) ... ok
+test_unhealthy_core_blocks_dns_lifecycle (__main__.CertbotContainerTests.test_unhealthy_core_blocks_dns_lifecycle) ... ok
+test_unowned_container_is_not_deleted (__main__.CertbotContainerTests.test_unowned_container_is_not_deleted) ... ok
+test_baseline_disagreement_is_not_accepted_as_another_certificate (__main__.CertificateShellTests.test_baseline_disagreement_is_not_accepted_as_another_certificate) ... ok
+test_mismatched_private_key_is_rejected (__main__.CertificateShellTests.test_mismatched_private_key_is_rejected) ... ok
+test_readonly_inspection_never_creates_missing_volume (__main__.CertificateShellTests.test_readonly_inspection_never_creates_missing_volume) ... ok
+test_real_shell_uses_pinned_custom_volume_and_validates_actual_certificate (__main__.CertificateShellTests.test_real_shell_uses_pinned_custom_volume_and_validates_actual_certificate) ... ok
+test_wrong_san_is_rejected (__main__.CertificateShellTests.test_wrong_san_is_rejected) ... ok
+test_guard_uses_leader_lock_endpoint_and_rejects_http_503 (__main__.PatroniHTTPTests.test_guard_uses_leader_lock_endpoint_and_rejects_http_503) ... ok
+test_dns_success_alone_cannot_finish_public_switch (__main__.PrimaryWaitTests.test_dns_success_alone_cannot_finish_public_switch) ... [taskforge] waiting 0s/10s target=B role=primary phase=ready dns_synced=False route_ready=False confirmations=3/3 traffic_ready=True retry_in=0s
+ok
+test_old_agent_revision_fails_immediately_instead_of_waiting_timeout (__main__.PrimaryWaitTests.test_old_agent_revision_fails_immediately_instead_of_waiting_timeout) ... ok
+test_ready_phase_requires_all_declared_confirmations (__main__.PrimaryWaitTests.test_ready_phase_requires_all_declared_confirmations) ... [taskforge] waiting 0s/10s target=B role=primary phase=ready dns_synced=False route_ready=True confirmations=2/3 traffic_ready=True retry_in=0s
+ok
+test_revalidation_route_check_does_not_finish_wait_even_with_old_fresh_proof (__main__.PrimaryWaitTests.test_revalidation_route_check_does_not_finish_wait_even_with_old_fresh_proof) ... [taskforge] waiting 0s/10s target=B role=primary phase=route-check dns_synced=False route_ready=True confirmations=1/3 traffic_ready=True retry_in=0s
+ok
+test_unavailable_agent_still_prints_progress (__main__.PrimaryWaitTests.test_unavailable_agent_still_prints_progress) ... ok
+test_wrong_node_identity_or_old_target_is_rejected (__main__.PrimaryWaitTests.test_wrong_node_identity_or_old_target_is_rejected) ... [taskforge] waiting 0s/10s target=B role=primary phase=ready dns_synced=False route_ready=True confirmations=3/3 traffic_ready=True retry_in=0s
+ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 11.111s
+
+OK
+test_full_lite_optional_and_assist_inventory (__main__.SqlRuntimeTests.test_full_lite_optional_and_assist_inventory) ... ok
+test_go_worker_has_native_health_and_thread_budget (__main__.SqlRuntimeTests.test_go_worker_has_native_health_and_thread_budget) ... ok
+test_lite_preparation_does_not_touch_docker_or_generate_engine_secrets (__main__.SqlRuntimeTests.test_lite_preparation_does_not_touch_docker_or_generate_engine_secrets) ... ok
+test_package_has_local_sql_init_and_no_r57_runtime_dependency (__main__.SqlRuntimeTests.test_package_has_local_sql_init_and_no_r57_runtime_dependency) ... ok
+test_preparation_preserves_existing_secrets_and_pins (__main__.SqlRuntimeTests.test_preparation_preserves_existing_secrets_and_pins) ... ok
+test_sql_cpu_memory_and_privilege_boundaries (__main__.SqlRuntimeTests.test_sql_cpu_memory_and_privilege_boundaries) ... ok
+test_sql_networks_and_cache_are_separate (__main__.SqlRuntimeTests.test_sql_networks_and_cache_are_separate) ... ok
+test_start_sql_is_deferred_not_in_primary_compose (__main__.SqlRuntimeTests.test_start_sql_is_deferred_not_in_primary_compose) ... ok
+test_stop_sql_is_deferred_not_in_primary_docker_stop (__main__.SqlRuntimeTests.test_stop_sql_is_deferred_not_in_primary_docker_stop) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.024s
+
+OK
+R59 RELEASE TEST: PASS (offline; no production Docker/Cloudflare/ACME execution)

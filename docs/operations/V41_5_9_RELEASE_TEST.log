@@ -1,0 +1,341 @@
+PASS: v41.5.9 release manifest validates
+PASS: no historical release payload is embedded
+PASS: no Python cache artifacts are packaged
+PASS: shell/Python syntax
+PASS: A/B full, C lite, all may be Primary, no preferred failback
+PASS: diagnostics MinIO retention configuration is present
+PASS: 1C runtime is opt-in, persistent-volume auto-installed and cluster-distributed via per-node MinIO
+PASS: topology normalization and operator ownership
+PASS: arbitrary old release state import + immutable persistent-volume baseline
+PASS: migration is state-based and contains no historical migration engine
+PASS: persistent-volume mutation is absent and temporary Primary selection is revision-agnostic
+PASS: re-home service inventory matches current Compose
+PASS: Cloudflare edge candidates A/B/C
+[taskforge] current Primary=A; requested Primary=C; target_profile=lite; cluster_view=B
+[taskforge] target preflight PASS: hot_start_ready=true lag=1024 edge_required=false
+[taskforge] Patroni accepted switchover A -> C (http=200).
+[taskforge] confirmed Primary=C; applications_active=True traffic_ready=False edge=unconfigured
+PRIMARY SWITCH: COMPLETE target=C changed=yes profile=lite
+PASS: manual Primary switch accepts C/lite
+test_app_status_uses_single_batch_for_all_apps (__main__.AgentEfficiencyTests.test_app_status_uses_single_batch_for_all_apps) ... ok
+test_batch_inspect_parses_many_with_one_docker_invocation (__main__.AgentEfficiencyTests.test_batch_inspect_parses_many_with_one_docker_invocation) ... ok
+test_host_snapshot_is_short_cached (__main__.AgentEfficiencyTests.test_host_snapshot_is_short_cached) ... ok
+test_steady_warm_standby_does_not_stop_again_or_report_optional_degraded (__main__.AgentEfficiencyTests.test_steady_warm_standby_does_not_stop_again_or_report_optional_degraded) ... ok
+test_stopped_optional_is_not_degraded_when_not_expected (__main__.AgentEfficiencyTests.test_stopped_optional_is_not_degraded_when_not_expected) ... ok
+test_tls_asset_probe_is_short_cached (__main__.AgentEfficiencyTests.test_tls_asset_probe_is_short_cached) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.003s
+
+OK
+PASS: Node Agent batching/standby-degraded efficiency tests
+test_agent_urls_include_local_liveness (__main__.NotificationNoiseTests.test_agent_urls_include_local_liveness) ... ok
+test_edge_ready_is_once_per_patroni_term_across_restart (__main__.NotificationNoiseTests.test_edge_ready_is_once_per_patroni_term_across_restart) ... ok
+test_previous_primary_unreachable_is_tagged_to_old_node_and_deduped (__main__.NotificationNoiseTests.test_previous_primary_unreachable_is_tagged_to_old_node_and_deduped) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.003s
+
+OK
+PASS: HA/TG notification-noise hotfix tests
+PASS: r66 inherited Watchtower/routing, readiness, diagnostics and Docker-config invariants
+PASS: inherited r66 operability regressions
+[TFDIAG START] node=A job=diag-20261023T165949Z-0aad1454 mode=standard since=3h max_log_mb=16
+[TFDIAG DONE] node=A job=diag-20261023T165949Z-0aad1454 file=taskforge_diagnostics_test.tar.gz bytes=20
+[TFDIAG START] node=A job=diag-20261023T165949Z-88486373 mode=quick since=30m max_log_mb=8
+[TFDIAG DONE] node=A job=diag-20261023T165949Z-88486373 file=taskforge_diagnostics_test.tar.gz bytes=20
+[TFDIAG START] node=A job=diag-20261023T165949Z-42137aa9 mode=full since=7d max_log_mb=256
+[TFDIAG DONE] node=A job=diag-20261023T165949Z-42137aa9 file=taskforge_diagnostics_test.tar.gz bytes=20
+[TFDIAG START] node=A job=diag-20261023T165949Z-a81c4f59 mode=standard since=1h max_log_mb=32
+[TFDIAG DONE] node=A job=diag-20261023T165949Z-a81c4f59 file=taskforge_diagnostics_test.tar.gz bytes=20
+PASS: r66 authenticated asynchronous diagnostics control
+PASS: inherited r66 diagnostics control regressions
+PASS: r68 collector publishes real container/stage/file/byte progress while collection is running
+PASS: r68 real diagnostics progress regressions
+PASS: r68 local Unix Node Agent control serves liveness and authenticated diagnostics without TCP hairpin
+PASS: r68 local Unix control socket regression
+PASS: SQL reconcile is strict manually, bounded/soft during migration, and skips standby/lite nodes
+PASS: inherited r66 SQL reconcile regressions
+[TFLOG CLEANUP] node=A reclaimed=1234 free_delta=1234
+PASS: v41.5.5 authenticated log cleanup is bounded, preserves data, and rejects diagnostics overlap
+PASS: v41.5.9 bounded authenticated log cleanup regressions
+PASS: container inventory and non-blocking lifecycle delegation
+PASS: v41.5.9 container inventory and local self-heal regressions
+V41.5.9 BASE REGRESSION TEST: PASS
+test_c_lite_can_update_edge (__main__.CFTests.test_c_lite_can_update_edge) ... ok
+test_cname_loop_rejected (__main__.CFTests.test_cname_loop_rejected) ... ok
+test_duplicate_aaaa_unknown_ip_and_disabled_proxy_block (__main__.CFTests.test_duplicate_aaaa_unknown_ip_and_disabled_proxy_block) ... ok
+test_fence_prevents_dns_changes (__main__.CFTests.test_fence_prevents_dns_changes) ... ok
+test_local_lock_prevents_concurrent_dns_writer (__main__.CFTests.test_local_lock_prevents_concurrent_dns_writer) ... ok
+test_lost_api_response_is_included_in_rollback (__main__.CFTests.test_lost_api_response_is_included_in_rollback) ... ok
+test_lost_leadership_stops_remaining_writes_and_rollback (__main__.CFTests.test_lost_leadership_stops_remaining_writes_and_rollback) ... ok
+test_partial_failure_rolls_back_only_while_still_primary (__main__.CFTests.test_partial_failure_rolls_back_only_while_still_primary) ... ok
+test_reconcile_then_idempotent_noop (__main__.CFTests.test_reconcile_then_idempotent_noop) ... ok
+test_acme_retry_cooldown_blocks_new_issuance (__main__.PipelineTests.test_acme_retry_cooldown_blocks_new_issuance) ... ok
+test_ca_failure_without_certificate_is_not_ready (__main__.PipelineTests.test_ca_failure_without_certificate_is_not_ready) ... ok
+test_demotion_during_certbot_prevents_gateway_restart (__main__.PipelineTests.test_demotion_during_certbot_prevents_gateway_restart) ... ok
+test_demotion_during_route_proof_stops_certbot (__main__.PipelineTests.test_demotion_during_route_proof_stops_certbot) ... ok
+test_demotion_during_settle_stops_certbot (__main__.PipelineTests.test_demotion_during_settle_stops_certbot) ... ok
+test_dns_failure_cannot_reach_certbot (__main__.PipelineTests.test_dns_failure_cannot_reach_certbot) ... ok
+test_exact_order_new_certificate (__main__.PipelineTests.test_exact_order_new_certificate) ... ok
+test_existing_cert_http_only_gateway_is_restarted (__main__.PipelineTests.test_existing_cert_http_only_gateway_is_restarted) ... ok
+test_existing_cert_reused_without_restart_or_ca_request (__main__.PipelineTests.test_existing_cert_reused_without_restart_or_ca_request) ... ok
+test_failed_renewal_preserves_valid_certificate_but_warns (__main__.PipelineTests.test_failed_renewal_preserves_valid_certificate_but_warns) ... ok
+test_http_confirmations_reset_after_any_failed_round (__main__.PipelineTests.test_http_confirmations_reset_after_any_failed_round) ... ok
+test_http_profile_does_not_issue_tls_certificate (__main__.PipelineTests.test_http_profile_does_not_issue_tls_certificate) ... ok
+test_http_wrong_node_never_reaches_certbot (__main__.PipelineTests.test_http_wrong_node_never_reaches_certbot) ... ok
+test_https_failure_never_sets_ready (__main__.PipelineTests.test_https_failure_never_sets_ready) ... ok
+test_policy_rejects_invalid_timeouts_and_weak_confirmation_count (__main__.PipelineTests.test_policy_rejects_invalid_timeouts_and_weak_confirmation_count) ... ok
+test_unconfigured_edge_does_not_invent_dns_success (__main__.PipelineTests.test_unconfigured_edge_does_not_invent_dns_success) ... ok
+test_real_http_challenge_and_real_tls_gateway_identity (__main__.RealCurlTests.test_real_http_challenge_and_real_tls_gateway_identity) ... ok
+test_cache_hit_rejected_even_with_matching_body (__main__.RouteTests.test_cache_hit_rejected_even_with_matching_body) ... ok
+test_cf_response_required (__main__.RouteTests.test_cf_response_required) ... ok
+test_challenge_symlink_is_rejected (__main__.RouteTests.test_challenge_symlink_is_rejected) ... ok
+test_https_checks_gateway_identity_not_nonexistent_https_acme (__main__.RouteTests.test_https_checks_gateway_identity_not_nonexistent_https_acme) ... ok
+test_invalid_host_cannot_inject_url_or_path (__main__.RouteTests.test_invalid_host_cannot_inject_url_or_path) ... ok
+test_marker_cleanup_on_cancellation (__main__.RouteTests.test_marker_cleanup_on_cancellation) ... ok
+test_redirect_is_not_mistaken_for_route_proof (__main__.RouteTests.test_redirect_is_not_mistaken_for_route_proof) ... ok
+test_unique_nonce_all_hosts_and_cleanup (__main__.RouteTests.test_unique_nonce_all_hosts_and_cleanup) ... ok
+test_wrong_body_is_rejected (__main__.RouteTests.test_wrong_body_is_rejected) ... ok
+test_slow_edge_worker_does_not_block_live_http_or_telemetry_and_cancels (__main__.SupervisorTests.test_slow_edge_worker_does_not_block_live_http_or_telemetry_and_cancels) ... ok
+test_stale_proof_expires (__main__.SupervisorTests.test_stale_proof_expires) ... ok
+test_certbot_retry_ledger_survives_new_process (__main__.SystemOpsTests.test_certbot_retry_ledger_survives_new_process) ... ok
+test_directory_instead_of_both_cf_files_is_not_unconfigured (__main__.SystemOpsTests.test_directory_instead_of_both_cf_files_is_not_unconfigured) ... ok
+test_guard_checks_timeline_and_primary_even_when_agent_claims_primary (__main__.SystemOpsTests.test_guard_checks_timeline_and_primary_even_when_agent_claims_primary) ... ok
+test_guard_does_not_trust_stale_config (__main__.SystemOpsTests.test_guard_does_not_trust_stale_config) ... ok
+test_guard_rejects_missing_timeline (__main__.SystemOpsTests.test_guard_rejects_missing_timeline) ... ok
+test_guard_respects_fence (__main__.SystemOpsTests.test_guard_respects_fence) ... ok
+test_guarded_command_is_cancelled_and_child_reaped (__main__.SystemOpsTests.test_guarded_command_is_cancelled_and_child_reaped) ... ok
+test_local_tls_uses_ca_validation_and_both_domains (__main__.SystemOpsTests.test_local_tls_uses_ca_validation_and_both_domains) ... ok
+test_partial_token_configuration_is_fail_closed (__main__.SystemOpsTests.test_partial_token_configuration_is_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 46 tests in 1.437s
+
+OK
+test_owned_certbot_is_cleaned_on_demotion (__main__.CertbotContainerTests.test_owned_certbot_is_cleaned_on_demotion) ... ok
+test_successful_cli_without_certificate_is_not_success (__main__.CertbotContainerTests.test_successful_cli_without_certificate_is_not_success) ... ok
+test_unhealthy_core_blocks_dns_lifecycle (__main__.CertbotContainerTests.test_unhealthy_core_blocks_dns_lifecycle) ... ok
+test_unowned_container_is_not_deleted (__main__.CertbotContainerTests.test_unowned_container_is_not_deleted) ... ok
+test_baseline_disagreement_is_not_accepted_as_another_certificate (__main__.CertificateShellTests.test_baseline_disagreement_is_not_accepted_as_another_certificate) ... ok
+test_mismatched_private_key_is_rejected (__main__.CertificateShellTests.test_mismatched_private_key_is_rejected) ... ok
+test_readonly_inspection_never_creates_missing_volume (__main__.CertificateShellTests.test_readonly_inspection_never_creates_missing_volume) ... ok
+test_real_shell_uses_pinned_custom_volume_and_validates_actual_certificate (__main__.CertificateShellTests.test_real_shell_uses_pinned_custom_volume_and_validates_actual_certificate) ... ok
+test_wrong_san_is_rejected (__main__.CertificateShellTests.test_wrong_san_is_rejected) ... ok
+test_guard_uses_leader_lock_endpoint_and_rejects_http_503 (__main__.PatroniHTTPTests.test_guard_uses_leader_lock_endpoint_and_rejects_http_503) ... ok
+test_dns_success_alone_cannot_finish_public_switch (__main__.PrimaryWaitTests.test_dns_success_alone_cannot_finish_public_switch) ... [taskforge] waiting 0s/10s target=B role=primary phase=ready dns_synced=False route_ready=False confirmations=3/3 traffic_ready=True retry_in=0s
+ok
+test_old_agent_revision_fails_immediately_instead_of_waiting_timeout (__main__.PrimaryWaitTests.test_old_agent_revision_fails_immediately_instead_of_waiting_timeout) ... ok
+test_ready_phase_requires_all_declared_confirmations (__main__.PrimaryWaitTests.test_ready_phase_requires_all_declared_confirmations) ... [taskforge] waiting 0s/10s target=B role=primary phase=ready dns_synced=False route_ready=True confirmations=2/3 traffic_ready=True retry_in=0s
+ok
+test_revalidation_route_check_does_not_finish_wait_even_with_old_fresh_proof (__main__.PrimaryWaitTests.test_revalidation_route_check_does_not_finish_wait_even_with_old_fresh_proof) ... [taskforge] waiting 0s/10s target=B role=primary phase=route-check dns_synced=False route_ready=True confirmations=1/3 traffic_ready=True retry_in=0s
+ok
+test_unavailable_agent_still_prints_progress (__main__.PrimaryWaitTests.test_unavailable_agent_still_prints_progress) ... ok
+test_wrong_node_identity_or_old_target_is_rejected (__main__.PrimaryWaitTests.test_wrong_node_identity_or_old_target_is_rejected) ... [taskforge] waiting 0s/10s target=B role=primary phase=ready dns_synced=False route_ready=True confirmations=3/3 traffic_ready=True retry_in=0s
+ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 12.747s
+
+OK
+test_full_lite_optional_and_assist_inventory (__main__.SqlRuntimeTests.test_full_lite_optional_and_assist_inventory) ... ok
+test_go_worker_has_native_health_and_thread_budget (__main__.SqlRuntimeTests.test_go_worker_has_native_health_and_thread_budget) ... ok
+test_lite_preparation_does_not_touch_docker_or_generate_engine_secrets (__main__.SqlRuntimeTests.test_lite_preparation_does_not_touch_docker_or_generate_engine_secrets) ... ok
+test_mysql_cpuv1_is_selected_by_host_capability_or_observed_failure (__main__.SqlRuntimeTests.test_mysql_cpuv1_is_selected_by_host_capability_or_observed_failure) ... ok
+test_mysql_init_script_is_safe_when_sourced_by_upstream_entrypoint (__main__.SqlRuntimeTests.test_mysql_init_script_is_safe_when_sourced_by_upstream_entrypoint) ... ok
+test_mysql_operator_override_still_wins_release_compatibility_pin (__main__.SqlRuntimeTests.test_mysql_operator_override_still_wins_release_compatibility_pin) ... ok
+test_mysql_runtime_family_is_stable_and_r70_ol9_is_upgraded (__main__.SqlRuntimeTests.test_mysql_runtime_family_is_stable_and_r70_ol9_is_upgraded) ... ok
+test_package_has_local_sql_init_and_no_r57_runtime_dependency (__main__.SqlRuntimeTests.test_package_has_local_sql_init_and_no_r57_runtime_dependency) ... ok
+test_preparation_preserves_secrets_and_selects_preferred_mysql_on_v2_host (__main__.SqlRuntimeTests.test_preparation_preserves_secrets_and_selects_preferred_mysql_on_v2_host) ... ok
+test_sql_cpu_memory_and_privilege_boundaries (__main__.SqlRuntimeTests.test_sql_cpu_memory_and_privilege_boundaries) ... ok
+test_sql_networks_and_cache_are_separate (__main__.SqlRuntimeTests.test_sql_networks_and_cache_are_separate) ... ok
+test_start_sql_is_deferred_not_in_primary_compose (__main__.SqlRuntimeTests.test_start_sql_is_deferred_not_in_primary_compose) ... ok
+test_stop_sql_is_deferred_not_in_primary_docker_stop (__main__.SqlRuntimeTests.test_stop_sql_is_deferred_not_in_primary_docker_stop) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.048s
+
+OK
+V41.5.9 RELEASE TEST: PASS (offline; no production Docker/Cloudflare/ACME execution)
+................
+----------------------------------------------------------------------
+Ran 16 tests in 0.896s
+
+OK
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.143s
+
+OK
+..............
+----------------------------------------------------------------------
+Ran 14 tests in 0.041s
+
+OK
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.029s
+
+OK
+test_agent_retains_fast_failover_tick (__main__.EfficientStandbyTests.test_agent_retains_fast_failover_tick) ... ok
+test_expired_config_cache_rerenders (__main__.EfficientStandbyTests.test_expired_config_cache_rerenders) ... ok
+test_failed_compose_config_is_never_cached (__main__.EfficientStandbyTests.test_failed_compose_config_is_never_cached) ... ok
+test_file_change_invalidates_config_cache_immediately (__main__.EfficientStandbyTests.test_file_change_invalidates_config_cache_immediately) ... ok
+test_opt_in_rabbitmq_change_only_when_warm_standby (__main__.EfficientStandbyTests.test_opt_in_rabbitmq_change_only_when_warm_standby) ... ok
+test_promotion_or_demote_wakes_agent_immediately (__main__.EfficientStandbyTests.test_promotion_or_demote_wakes_agent_immediately) ... ok
+test_rabbitmq_real_probe_frequency_drops_sixfold (__main__.EfficientStandbyTests.test_rabbitmq_real_probe_frequency_drops_sixfold) ... ok
+test_registry_batches_reuse_one_compose_config_within_sweep (__main__.EfficientStandbyTests.test_registry_batches_reuse_one_compose_config_within_sweep) ... ok
+test_routing_change_wakes_even_when_desired_services_same (__main__.EfficientStandbyTests.test_routing_change_wakes_even_when_desired_services_same) ... ok
+test_unchanged_standby_does_not_trigger_extra_full_lifecycle_wake (__main__.EfficientStandbyTests.test_unchanged_standby_does_not_trigger_extra_full_lifecycle_wake) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.006s
+
+OK
+test_force_recreate_failure_is_reported_not_hidden (__main__.DockerPrepareVerificationTests.test_force_recreate_failure_is_reported_not_hidden) ... ok
+test_missing_actual_image_triggers_exactly_one_force_recreate (__main__.DockerPrepareVerificationTests.test_missing_actual_image_triggers_exactly_one_force_recreate) ... ok
+test_normal_prepare_does_not_force_recreate (__main__.DockerPrepareVerificationTests.test_normal_prepare_does_not_force_recreate) ... ok
+test_rabbitmq_optimizer_preserves_volume_and_primary_gate (__main__.ReleaseSafetyTests.test_rabbitmq_optimizer_preserves_volume_and_primary_gate) ... ok
+test_schema_and_data_services_unchanged (__main__.ReleaseSafetyTests.test_schema_and_data_services_unchanged) ... ok
+test_existing_running_apps_reject_standby_optimizer (__main__.ShellPreflightTests.test_existing_running_apps_reject_standby_optimizer) ... ok
+test_fence_or_hot_readiness_loss_prevents_mutation (__main__.ShellPreflightTests.test_fence_or_hot_readiness_loss_prevents_mutation) ... ok
+test_health_duration_go_string_and_nanoseconds_supported (__main__.ShellPreflightTests.test_health_duration_go_string_and_nanoseconds_supported) ... ok
+test_no_ack_means_no_rabbitmq_recreation (__main__.ShellPreflightTests.test_no_ack_means_no_rabbitmq_recreation) ... ok
+test_operator_can_request_pause_while_image_is_applying (__main__.ShellPreflightTests.test_operator_can_request_pause_while_image_is_applying) ... ok
+test_primary_or_assist_mode_are_forbidden (__main__.ShellPreflightTests.test_primary_or_assist_mode_are_forbidden) ... ok
+test_wrong_control_revision_rejected (__main__.ShellPreflightTests.test_wrong_control_revision_rejected) ... ok
+test_acknowledged_maintenance_pauses_compose_and_registry (__main__.StandbyCorrectnessTests.test_acknowledged_maintenance_pauses_compose_and_registry) ... ok
+test_after_lease_release_checks_resume (__main__.StandbyCorrectnessTests.test_after_lease_release_checks_resume) ... ok
+test_bad_or_world_readable_lease_is_ignored (__main__.StandbyCorrectnessTests.test_bad_or_world_readable_lease_is_ignored) ... ok
+test_compose_success_without_new_image_does_not_forge_current (__main__.StandbyCorrectnessTests.test_compose_success_without_new_image_does_not_forge_current) ... ok
+test_expired_lease_does_not_hold_back_standby (__main__.StandbyCorrectnessTests.test_expired_lease_does_not_hold_back_standby) ... ok
+test_failure_backoff_grows_instead_of_cpu_spin (__main__.StandbyCorrectnessTests.test_failure_backoff_grows_instead_of_cpu_spin) ... ok
+test_new_digest_overrides_old_failure_backoff (__main__.StandbyCorrectnessTests.test_new_digest_overrides_old_failure_backoff) ... ok
+test_prepare_reason_persisted (__main__.StandbyCorrectnessTests.test_prepare_reason_persisted) ... ok
+test_promotion_preempts_maintenance_lease_immediately (__main__.StandbyCorrectnessTests.test_promotion_preempts_maintenance_lease_immediately) ... ok
+test_recovery_after_backoff_restores_clean_status (__main__.StandbyCorrectnessTests.test_recovery_after_backoff_restores_clean_status) ... ok
+test_verified_prepare_is_staged_only_once (__main__.StandbyCorrectnessTests.test_verified_prepare_is_staged_only_once) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.256s
+
+OK
+test_backend_snapshot_exposes_fallback_diagnostic (__main__.DockerObserveTests.test_backend_snapshot_exposes_fallback_diagnostic) ... ok
+test_fail_closed_when_docker_list_unavailable (__main__.DockerObserveTests.test_fail_closed_when_docker_list_unavailable) ... ok
+test_fail_closed_when_raw_inspect_unavailable (__main__.DockerObserveTests.test_fail_closed_when_raw_inspect_unavailable) ... ok
+test_incomplete_docker_json_cannot_be_accepted (__main__.DockerObserveTests.test_incomplete_docker_json_cannot_be_accepted) ... ok
+test_json_works_for_two_existing_and_one_missing (__main__.DockerObserveTests.test_json_works_for_two_existing_and_one_missing) ... ok
+test_localized_error_does_not_require_english_phrases (__main__.DockerObserveTests.test_localized_error_does_not_require_english_phrases) ... ok
+test_no_overhead_for_healthy_or_staged_docker (__main__.DockerObserveTests.test_no_overhead_for_healthy_or_staged_docker) ... ok
+test_other_compose_project_never_adopted (__main__.DockerObserveTests.test_other_compose_project_never_adopted) ... ok
+test_prepare_forces_recreate_once_on_confirmed_wrong_image (__main__.DockerObserveTests.test_prepare_forces_recreate_once_on_confirmed_wrong_image) ... ok
+test_prepare_one_compose_when_template_fails_but_raw_json_proves_image (__main__.DockerObserveTests.test_prepare_one_compose_when_template_fails_but_raw_json_proves_image) ... ok
+test_real_absent_service_not_mistaken_for_daemon_failure (__main__.DockerObserveTests.test_real_absent_service_not_mistaken_for_daemon_failure) ... ok
+test_silent_partial_formatted_output_requires_confirmation (__main__.DockerObserveTests.test_silent_partial_formatted_output_requires_confirmation) ... ok
+test_template_error_recovers_with_raw_docker_json (__main__.DockerObserveTests.test_template_error_recovers_with_raw_docker_json) ... ok
+test_acknowledged_maintenance_still_required (__main__.OptimizerSafetyTests.test_acknowledged_maintenance_still_required) ... ok
+test_global_updater_fault_still_blocks (__main__.OptimizerSafetyTests.test_global_updater_fault_still_blocks) ... ok
+test_hot_readiness_is_required (__main__.OptimizerSafetyTests.test_hot_readiness_is_required) ... ok
+test_image_errors_do_not_block_infra_maintenance_when_hot_standby (__main__.OptimizerSafetyTests.test_image_errors_do_not_block_infra_maintenance_when_hot_standby) ... ok
+test_primary_and_nonidle_modes_are_forbidden (__main__.OptimizerSafetyTests.test_primary_and_nonidle_modes_are_forbidden) ... ok
+test_clear_only_obsolete_inspect_error_and_keep_others (__main__.SavedStateUpgradeTests.test_clear_only_obsolete_inspect_error_and_keep_others) ... ok
+test_target_and_sha_are_not_forged_if_actual_missing (__main__.SavedStateUpgradeTests.test_target_and_sha_are_not_forged_if_actual_missing) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.150s
+
+OK
+test_absent_health_on_stopped_container_needs_only_one_inspect (__main__.HealthTemplateTests.test_absent_health_on_stopped_container_needs_only_one_inspect) ... ok
+test_actual_go_template_missingkey_error_behavior (__main__.HealthTemplateTests.test_actual_go_template_missingkey_error_behavior) ... ok
+test_all_active_healthcheck_templates_are_safe (__main__.HealthTemplateTests.test_all_active_healthcheck_templates_are_safe) ... ok
+test_genuinely_missing_container_still_fallbacks_not_assumed_healthy (__main__.HealthTemplateTests.test_genuinely_missing_container_still_fallbacks_not_assumed_healthy) ... ok
+test_mixed_healthy_and_unhealthy_containers_without_fallback (__main__.HealthTemplateTests.test_mixed_healthy_and_unhealthy_containers_without_fallback) ... ok
+test_no_new_infrastructure_mutation (__main__.HealthTemplateTests.test_no_new_infrastructure_mutation) ... ok
+test_version_and_rabbitmq_health_retained (__main__.HealthTemplateTests.test_version_and_rabbitmq_health_retained) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.142s
+
+OK
+PASS: v41.5.9 registry fairness, retries, Watchtower retirement and migration safety
+PASS: application updater isolation, retries, rollback, role fences and measured telemetry
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.014s
+
+OK
+PASS: v41.5.9 Patroni leader-lookup hold and confirmed-demotion fencing
+test_cooldown_does_not_keep_increasing_when_container_is_stopped (__main__.StoppedUnhealthyRetryTests.test_cooldown_does_not_keep_increasing_when_container_is_stopped) ... ok
+test_fast_crash_is_delayed_and_then_retried_once (__main__.StoppedUnhealthyRetryTests.test_fast_crash_is_delayed_and_then_retried_once) ... ok
+test_old_backoff_cleared_once_on_version_upgrade (__main__.StoppedUnhealthyRetryTests.test_old_backoff_cleared_once_on_version_upgrade) ... ok
+test_standby_and_fence_never_revive_stopped_container (__main__.StoppedUnhealthyRetryTests.test_standby_and_fence_never_revive_stopped_container) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.005s
+
+OK
+PASS: v41.5.9 stopped/unhealthy restart and bounded re-crash retries
+test_local_loopback_fallback_does_not_turn_network_failure_into_stop (__main__.AgentGuardTests.test_local_loopback_fallback_does_not_turn_network_failure_into_stop) ... ok
+test_missing_cluster_reply_is_not_stop_evidence (__main__.AgentGuardTests.test_missing_cluster_reply_is_not_stop_evidence) ... ok
+test_replica_is_immediate_positive_stop_evidence (__main__.AgentGuardTests.test_replica_is_immediate_positive_stop_evidence) ... ok
+test_start_requires_patroni_lock_proof_not_just_cached_cluster (__main__.AgentGuardTests.test_start_requires_patroni_lock_proof_not_just_cached_cluster) ... ok
+test_unknown_role_requires_both_time_and_samples (__main__.AgentGuardTests.test_unknown_role_requires_both_time_and_samples) ... ok
+test_monitor_persists_bounded_evidence_and_deduplicates (__main__.EvidenceTests.test_monitor_persists_bounded_evidence_and_deduplicates) ... ok
+test_previous_primary_agent_timeout_with_live_patroni_is_not_node_down (__main__.EvidenceTests.test_previous_primary_agent_timeout_with_live_patroni_is_not_node_down) ... ok
+test_probe_validates_identity (__main__.EvidenceTests.test_probe_validates_identity) ... ok
+test_single_timeout_does_not_confirm_failure (__main__.EvidenceTests.test_single_timeout_does_not_confirm_failure) ... ok
+test_three_failures_without_elapsed_window_do_not_confirm (__main__.EvidenceTests.test_three_failures_without_elapsed_window_do_not_confirm) ... ok
+test_actual_demotion_after_start_still_stops (__main__.MutationTests.test_actual_demotion_after_start_still_stops) ... ok
+test_confirmed_standby_does_stop (__main__.MutationTests.test_confirmed_standby_does_stop) ... ok
+test_dependency_outage_blocks_health_restart (__main__.MutationTests.test_dependency_outage_blocks_health_restart) ... ok
+test_dependency_outage_blocks_running_image_replacement (__main__.MutationTests.test_dependency_outage_blocks_running_image_replacement) ... ok
+test_elapsed_time_and_sample_count_both_required (__main__.MutationTests.test_elapsed_time_and_sample_count_both_required) ... ok
+test_only_two_widely_spaced_samples_do_not_confirm_unhealthy (__main__.MutationTests.test_only_two_widely_spaced_samples_do_not_confirm_unhealthy) ... ok
+test_promotion_during_stop_probe_cancels_stale_stop (__main__.MutationTests.test_promotion_during_stop_probe_cancels_stale_stop) ... ok
+test_real_backend_rechecks_guard_before_force_recreation (__main__.MutationTests.test_real_backend_rechecks_guard_before_force_recreation) ... ok
+test_running_identity_change_resets_confirmation (__main__.MutationTests.test_running_identity_change_resets_confirmation) ... ok
+test_stopped_container_still_recovers_without_unhealthy_delay (__main__.MutationTests.test_stopped_container_still_recovers_without_unhealthy_delay) ... ok
+test_successful_start_survives_transient_followup_timeout (__main__.MutationTests.test_successful_start_survives_transient_followup_timeout) ... ok
+test_transient_unhealthy_is_not_restarted (__main__.MutationTests.test_transient_unhealthy_is_not_restarted) ... ok
+test_unconfirmed_standby_does_not_stop_running_apps (__main__.MutationTests.test_unconfirmed_standby_does_not_stop_running_apps) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.019s
+
+OK
+test_ambiguous_patch_response_verified_without_retry (__main__.PolicyTests.test_ambiguous_patch_response_verified_without_retry) ... ok
+test_constraint_and_backup (__main__.PolicyTests.test_constraint_and_backup) ... ok
+test_custom_timing_not_silently_overwritten (__main__.PolicyTests.test_custom_timing_not_silently_overwritten) ... ok
+test_explicit_rollback_restores_only_saved_timers (__main__.PolicyTests.test_explicit_rollback_restores_only_saved_timers) ... ok
+test_guarded_patch_only_changes_timers (__main__.PolicyTests.test_guarded_patch_only_changes_timers) ... ok
+test_multiple_primaries_block_patch (__main__.PolicyTests.test_multiple_primaries_block_patch) ... ok
+test_old_standby_must_be_updated_first (__main__.PolicyTests.test_old_standby_must_be_updated_first) ... ok
+test_rerun_is_idempotent (__main__.PolicyTests.test_rerun_is_idempotent) ... ok
+test_rollback_refuses_intervening_custom_policy (__main__.PolicyTests.test_rollback_refuses_intervening_custom_policy) ... ok
+test_standby_never_patches_cluster (__main__.PolicyTests.test_standby_never_patches_cluster) ... ok
+test_unreachable_voter_blocks_patch (__main__.PolicyTests.test_unreachable_voter_blocks_patch) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.014s
+
+OK
+HA_POLICY: VERIFIED on all nodes {"loop_wait": 10, "retry_timeout": 45, "ttl": 120}; no PostgreSQL restart
+HA_POLICY: VERIFIED on all nodes {"loop_wait": 10, "retry_timeout": 45, "ttl": 120}; no PostgreSQL restart
+HA_POLICY: VERIFIED on all nodes {"loop_wait": 10, "retry_timeout": 45, "ttl": 120}; no PostgreSQL restart
+HA_POLICY: VERIFIED on all nodes {"loop_wait": 10, "retry_timeout": 10, "ttl": 30}; no PostgreSQL restart
+HA_POLICY: VERIFIED on all nodes {"loop_wait": 10, "retry_timeout": 45, "ttl": 120}; no PostgreSQL restart
+HA_POLICY: VERIFIED on all nodes {"loop_wait": 10, "retry_timeout": 45, "ttl": 120}; no PostgreSQL restart
+HA_POLICY: already applied {"loop_wait": 10, "retry_timeout": 45, "ttl": 120}
+HA_POLICY: VERIFIED on all nodes {"loop_wait": 10, "retry_timeout": 45, "ttl": 120}; no PostgreSQL restart
+HA_POLICY: STANDBY; local control installed; cluster timers apply on current Primary last.
+test_archive_defaults_to_current_directory (__main__.DiagnosticTests.test_archive_defaults_to_current_directory) ... ok
+test_direct_log_reader_finds_existing_history_without_touching_source (__main__.DiagnosticTests.test_direct_log_reader_finds_existing_history_without_touching_source) ... ok
+test_ha_logs_excluded_from_cleanup (__main__.DiagnosticTests.test_ha_logs_excluded_from_cleanup) ... ok
+test_obvious_credentials_redacted (__main__.DiagnosticTests.test_obvious_credentials_redacted) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.002s
+
+OK
+PASS: v41.5.9 HA confirmation, mutation gates, timing policy and forensic logs
+FULL_RELEASE_EXIT=0

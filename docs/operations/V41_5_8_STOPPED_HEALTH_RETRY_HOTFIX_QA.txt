@@ -1,0 +1,40 @@
+TaskForge Server v41.5.8 / revision 410508: stopped/unhealthy auto-recovery hotfix
+Date: 2026-10-21
+
+Observed incident on B after v41.5.7 migration:
+  Postgres=primary, 22 core apps=healthy, traffic_ready=True,
+  8 optional apps=Exited(0/137) but updater reports
+  healthcheck-failed:exited/unhealthy and failed=8.
+
+ROOT CAUSE IN PREVIOUS RELEASE:
+  ManagedUpdates.step evaluated a cached Docker unhealthy status for an
+  exited/created container BEFORE the desired-running start branch.
+  On each expired next_attempt this emitted _failed(), increasing the next
+  retry again. Thus the service never reached backend.start().
+
+FIX:
+  - Stopped/created/dead containers use their own start recovery branch.
+  - A repeat exit during the verification grace produces one failure and
+    a bounded retry instead of spinning with docker start every 5s.
+  - Existing explicit retry deadlines are respected.
+  - On first v41.5.8 Agent load, old healthcheck-failed:exited/* records
+    receive exactly one immediate attempt, guarded by the usual Primary
+    role and fencing checks. This migration is durable per service.
+  - Real standby / leader conflict / control fence never starts apps.
+
+OFFLINE VERIFICATION:
+  python3 -B tests/test_v4158_stopped_unhealthy_retry.py
+  python3 -B tests/test_managed_updates.py
+  python3 tests/test_primary_cluster_desired_hold_hotfix.py
+  sha256sum -c RELEASE_MANIFEST.sha256
+
+ROLL OUT:
+  Update each confirmed standby first, B Primary last, serially.
+  sudo bash ./cluster.sh migrate
+  sudo bash /opt/taskforge/control/cluster.sh status
+  Verify optional updater errors clear and Docker app containers healthy.
+  Do not use docker compose down / volume prune or change PostgreSQL roles.
+
+LIVE CLUSTER AND NETWORK TESTS:
+  Not performed in offline validation; confirm desired policy, unique
+  Patroni Primary, application health and public route after deployment.
